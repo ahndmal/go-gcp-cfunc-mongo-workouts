@@ -11,7 +11,7 @@ import (
 	"os"
 )
 
-func GetWorkouts(w http.ResponseWriter, req *http.Request) {
+func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	uri := os.Getenv("DB_URL")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
 	if err != nil {
@@ -24,8 +24,17 @@ func GetWorkouts(w http.ResponseWriter, req *http.Request) {
 	}()
 
 	coll := client.Database("workouts").Collection("workouts")
-	var workout bson.M
-	err = coll.FindOne(context.TODO(), bson.D{{"workout_type", "BACK"}}).Decode(&workout)
+	workouts := make([]bson.M, 0)
+	//err = coll.FindOne(context.TODO(), bson.D{{"workout_type", "BACK"}}).Decode(&workout)
+	//err = coll.FindOne(context.TODO(), bson.D{}).Decode(&workouts)
+	cursor, err := coll.Find(context.TODO(), bson.D{})
+	if err != nil {
+		return
+	}
+	err2 := cursor.All(context.TODO(), &workouts)
+	if err2 != nil {
+		return
+	}
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No document was found with the title %s\n", "title")
 		return
@@ -33,10 +42,10 @@ func GetWorkouts(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	jsonData, err := json.MarshalIndent(workout, "", "    ")
+	jsonData, err := json.MarshalIndent(workouts, "", "    ")
 	if err != nil {
 		panic(err)
 	}
 
-	fmt.Fprint(w, jsonData)
+	fmt.Fprint(writer, string(jsonData))
 }
