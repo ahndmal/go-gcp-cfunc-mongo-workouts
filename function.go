@@ -1,34 +1,42 @@
 package p
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"html"
-	"io"
-	"log"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"net/http"
+	"os"
 )
 
-func GetWorkouts(w http.ResponseWriter, r *http.Request) {
-	var d struct {
-		Message string `json:"message"`
+func GetWorkouts(w http.ResponseWriter, req *http.Request) {
+	uri := os.Getenv("DB_URL")
+	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
+	if err != nil {
+		panic(err)
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
-		switch err {
-		case io.EOF:
-			fmt.Fprint(w, "Hello World!")
-			return
-		default:
-			log.Printf("json.NewDecoder: %v", err)
-			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
-			return
+	defer func() {
+		if err := client.Disconnect(context.TODO()); err != nil {
+			panic(err)
 		}
-	}
+	}()
 
-	if d.Message == "" {
-		fmt.Fprint(w, "Hello World!")
+	coll := client.Database("workouts").Collection("workouts")
+	var workout bson.M
+	err = coll.FindOne(context.TODO(), bson.D{{"workout_type", "BACK"}}).Decode(&workout)
+	if err == mongo.ErrNoDocuments {
+		fmt.Printf("No document was found with the title %s\n", "title")
 		return
 	}
-	fmt.Fprint(w, html.EscapeString(d.Message))
+	if err != nil {
+		panic(err)
+	}
+	jsonData, err := json.MarshalIndent(workout, "", "    ")
+	if err != nil {
+		panic(err)
+	}
+
+	fmt.Fprint(w, jsonData)
 }
