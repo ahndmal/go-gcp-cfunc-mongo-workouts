@@ -7,6 +7,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"log"
 	"net/http"
 	"os"
 )
@@ -22,30 +23,44 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 			panic(err)
 		}
 	}()
-
 	coll := client.Database("workouts").Collection("workouts")
-	workouts := make([]bson.M, 0)
-	//err = coll.FindOne(context.TODO(), bson.D{{"workout_type", "BACK"}}).Decode(&workout)
-	//err = coll.FindOne(context.TODO(), bson.D{}).Decode(&workouts)
+	//workouts := make([]bson.M, 0)
+	var workouts []bson.D
+	//var workouts []Workout
+	params := req.URL.Query()
+	if len(params.Get("type")) == 0 { // get by TYPE if requested
+		cursor, err := coll.Find(context.TODO(), bson.D{{"type", params.Get("type")}})
+		if err == mongo.ErrNoDocuments {
+			fmt.Printf("No document was found with the type %s\n", "type")
+			return
+		}
+		err2 := cursor.All(context.TODO(), &workouts)
+		if err2 != nil {
+			log.Panicln(err2)
+		}
+		jsonData, err := json.MarshalIndent(workouts, "", "    ")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Fprint(writer, string(jsonData))
+	}
 	cursor, err := coll.Find(context.TODO(), bson.D{})
-	if err != nil {
-		return
-	}
-	err2 := cursor.All(context.TODO(), &workouts)
-	if err2 != nil {
-		return
-	}
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No document was found with the title %s\n", "title")
 		return
 	}
-	if err != nil {
-		panic(err)
+	err2 := cursor.All(context.TODO(), &workouts)
+	if err2 != nil {
+		log.Panicln(err2)
 	}
-	jsonData, err := json.MarshalIndent(workouts, "", "    ")
-	if err != nil {
-		panic(err)
+	log.Printf("Type of workouts is %T", workouts) // reflect.TypeOf(workouts)
+	log.Println(workouts[0])
+
+	jsonData, err3 := json.Marshal(workouts)
+	if err3 != nil {
+		log.Panicln(err)
 	}
+	req.Header.Add("Content-Type", "application/json")
 
 	fmt.Fprint(writer, string(jsonData))
 }
