@@ -13,4 +13,5 @@ type Workout struct {
 	Week         int       `json:"week"`
 	WorkoutType  string    `json:"workout_type" bson:"workout_type"`
 	Month        string    `json:"month"`
+	Year         int       `json:"year"`
 }
