@@ -42,7 +42,9 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	//	}
 	//	fmt.Fprint(writer, string(jsonData))
 	//}
-	cursor, err := coll.Find(context.TODO(), bson.D{})
+	filter := bson.D{}
+	opts := options.Find().SetSort(bson.D{{"record", -1}})
+	cursor, err := coll.Find(context.TODO(), filter, opts)
 	if err == mongo.ErrNoDocuments {
 		fmt.Printf("No document was found with the title %s\n", "title")
 		return
