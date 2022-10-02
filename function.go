@@ -60,7 +60,7 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	var workouts []Workout
 	//workouts := make([]Workout, 0)
 
-	if param == "month" && param2 == "year" {
+	if paramName == "month" && paramName2 == "year" {
 		//filter := bson.D{{paramName, param}, }
 
 		//filter := bson.D{{paramName, param}, bson.M{"createdAt": bson.M{
@@ -69,8 +69,9 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 
 		//"01 Oct 22 15:04 MST"
 		workDate, err := time.Parse(time.RFC822, fmt.Sprintf("01 %s %s 00:00 MST", month[0:3], year[2:4]))
+		log.Printf(">>> parsed date is : %s", fmt.Sprintf("01 %s %s 00:00 MST", month[0:3], year[2:4]))
 
-		cursor, err4 := coll.Find(context.TODO(), bson.M{"createdAt": bson.M{
+		cursor, err4 := coll.Find(context.TODO(), bson.M{"created_at": bson.M{
 			"$gte": primitive.NewDateTimeFromTime(workDate),
 		}})
 		//findOptions := options.Find().SetSort(bson.D{{"record", -1}}) // find using filter and sort
