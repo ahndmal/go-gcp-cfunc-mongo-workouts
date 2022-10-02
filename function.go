@@ -24,18 +24,19 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	var param string
 
 	if len(wType) > 0 {
-		param = wType
 		paramName = "workout_type"
+		param = wType
 	} else if len(wDate) > 0 {
-		param = wDate
 		paramName = "workout_date"
+		param = wDate
 	} else if len(month) > 0 {
-		param = month
 		paramName = "month"
+		param = month
 	} else if len(comments) > 0 {
-		param = comments
 		paramName = "comments"
+		param = comments
 	}
+	log.Printf(">>>>> param is %s: %s ", paramName, param)
 
 	uri := os.Getenv("DB_URL")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
@@ -50,15 +51,15 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	coll := client.Database("workouts").Collection("workouts")
 
 	//var workouts []bson.D
-	//var workouts []Workout
-	workouts := make([]Workout, 0)
+	var workouts []Workout
+	//workouts := make([]Workout, 0)
 
 	// filter / query
 	filter := bson.D{{paramName, param}}
 	findOptions := options.Find().SetSort(bson.D{{"record", -1}}) // find using filter and sort
 	//cursor, err := coll.Find(context.TODO(), bson.D{{"workout_type", wType}})	// find by type
-	cursor, err := coll.Find(context.TODO(), filter, findOptions)
-	if err == mongo.ErrNoDocuments {
+	cursor, err4 := coll.Find(context.TODO(), filter, findOptions)
+	if err4 == mongo.ErrNoDocuments {
 		fmt.Printf("No document was found with the %s %s \n", paramName, param)
 		return
 	}
@@ -66,19 +67,17 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	if err2 != nil {
 		log.Panicln(err2)
 	}
-	jsonData, err := json.MarshalIndent(workouts, "", "    ")
-	if err != nil {
+	jsonData, err3 := json.MarshalIndent(workouts, "", "    ")
+	if err3 != nil {
 		panic(err)
 	}
-	fmt.Fprint(writer, string(jsonData))
 
-	jsonData, err3 := json.Marshal(workouts)
-	if err3 != nil {
-		log.Panicln(err)
-	}
 	req.Header.Add("Content-Type", "application/json")
 	//req.Header.Add("Accept", "application/json")
 	//req.Response.Header.Add("Content-Type", "application/json")
 
-	fmt.Fprint(writer, string(jsonData))
+	_, err5 := fmt.Fprint(writer, string(jsonData))
+	if err5 != nil {
+		log.Fatalln(err5)
+	}
 }

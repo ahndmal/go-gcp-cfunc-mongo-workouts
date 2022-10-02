@@ -8,7 +8,7 @@ type Workout struct {
 	Sets         int       `json:"sets"`
 	Comments     string    `json:"comments"`
 	CreationDate time.Time `json:"creation_date" bson:"creation_date"`
-	WorkoutDate  time.Time `json:"workout_date" bson:"workout_date"`
+	WorkoutDate  string    `json:"workout_date" bson:"workout_date"`
 	Day          string    `json:"day"`
 	Week         int       `json:"week"`
 	WorkoutType  string    `json:"workout_type" bson:"workout_type"`
