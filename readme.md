@@ -1,14 +1,21 @@
+## Workout Android App
 
-Deploy
+GCP serverless function to get all workouts by:
+- type
+- date
+
+
+### Deploy
 ```
 ~/google-cloud-sdk/bin/gcloud functions deploy go_gcp_cfunc_mongo_workouts --trigger-http --runtime=go116 --entry-point=GetWorkouts --allow-unauthenticated --memory=256MB
 ```
-LOGS
+### LOGS
 ```google cloud
 gcloud functions logs read
 gcloud functions logs read FUNCTION_NAME --execution-id EXECUTION_ID
 ```
-Mongo
+### Mongo
+
 Install Mongo Tools
 
 ```bash
