@@ -17,6 +17,10 @@ import (
 func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	queryParams := req.URL.Query()
 
+	//req.Response.Header.Add("Access-Control-Allow-Origin", "https://workouts-web-static.vercel.app")
+
+	writer.Header().Set("Access-Control-Allow-Origin", "https://workouts-web-static.vercel.app")
+
 	wType := queryParams.Get("wType")
 	wDate := queryParams.Get("wDate")
 	month := queryParams.Get("month")
