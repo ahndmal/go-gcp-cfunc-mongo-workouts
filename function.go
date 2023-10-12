@@ -3,6 +3,7 @@ package p
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,8 +17,6 @@ import (
 
 func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	queryParams := req.URL.Query()
-
-	//req.Response.Header.Add("Access-Control-Allow-Origin", "https://workouts-web-static.vercel.app")
 
 	writer.Header().Set("Access-Control-Allow-Origin", "https://workouts-web-static.vercel.app")
 
@@ -79,7 +78,7 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		}})
 		//findOptions := options.Find().SetSort(bson.D{{"record", -1}}) // find using filter and sort
 		//cursor, err4 := coll.Find(context.TODO(), filter, findOptions)
-		if err4 == mongo.ErrNoDocuments {
+		if errors.Is(err4, mongo.ErrNoDocuments) {
 			fmt.Printf("No document was found with the %s %s \n", paramName, param)
 			return
 		}
@@ -101,9 +100,10 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		// filter / query
 		filter := bson.D{{paramName, param}}
 		findOptions := options.Find().SetSort(bson.D{{"record", -1}}) // find using filter and sort
+
 		//cursor, err := coll.Find(context.TODO(), bson.D{{"workout_type", wType}})	// find by type
 		cursor, err4 := coll.Find(context.TODO(), filter, findOptions)
-		if err4 == mongo.ErrNoDocuments {
+		if errors.Is(err4, mongo.ErrNoDocuments) {
 			fmt.Printf("No document was found with the %s %s \n", paramName, param)
 			return
 		}
