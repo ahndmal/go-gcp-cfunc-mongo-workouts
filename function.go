@@ -155,7 +155,7 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 
 		err2 := cursor.All(context.TODO(), &workouts)
 		if err2 != nil {
-			log.Panicln(err2)
+			log.Printf(">> Error when writing data from ALL on mongo cursor to workouts: %v", err2)
 		}
 
 		for _, workout := range workouts {
@@ -180,13 +180,17 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 }
 
 func convertWorkout(workout Workout) WorkoutDto {
+	//cDateStr, err := time.Parse(time.RFC822, workout.CreationDate)
+	var wDateStr string
+	//wDateStr = workout.CreationDate.String()
+	wDateStr = workout.CreationDate.Format(time.RFC1123)
 
 	dto := WorkoutDto{
 		Id:           workout.Id,
 		Record:       workout.Record,
 		Sets:         workout.Sets,
 		Comments:     workout.Comments,
-		CreationDate: workout.CreationDate.String(),
+		CreationDate: wDateStr,
 		WorkoutDate:  workout.WorkoutDate,
 		Day:          workout.Day,
 		Week:         workout.Week,
