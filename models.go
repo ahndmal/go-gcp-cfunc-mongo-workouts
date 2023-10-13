@@ -15,3 +15,17 @@ type Workout struct {
 	Month        string    `json:"month"`
 	Year         int       `json:"year"`
 }
+
+type WorkoutDto struct {
+	Id           string `json:"_id" bson:"_id,omitempty"`
+	Record       int64  `json:"record"`
+	Sets         int    `json:"sets"`
+	Comments     string `json:"comments"`
+	CreationDate string `json:"creation_date" bson:"creation_date"`
+	WorkoutDate  string `json:"workout_date" bson:"workout_date"`
+	Day          string `json:"day"`
+	Week         int    `json:"week"`
+	WorkoutType  string `json:"workout_type" bson:"workout_type"`
+	Month        string `json:"month"`
+	Year         int    `json:"year"`
+}

@@ -61,6 +61,7 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 
 	//var workouts []bson.D
 	var workouts []Workout
+	workoutDtos := make([]WorkoutDto, 0)
 
 	if paramName == "month" && paramName2 == "year" {
 		//filter := bson.D{{paramName, param}, }
@@ -91,7 +92,13 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		if err2 != nil {
 			log.Panicln(err2)
 		}
-		jsonData, err3 := json.MarshalIndent(workouts, "", "    ")
+
+		for _, workout := range workouts {
+			dto := convertWorkout(workout)
+			workoutDtos = append(workoutDtos, dto)
+		}
+
+		jsonData, err3 := json.MarshalIndent(workoutDtos, "", "    ")
 		if err3 != nil {
 			panic(err)
 		}
@@ -118,7 +125,13 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		if err2 != nil {
 			log.Panicln(err2)
 		}
-		jsonData, err3 := json.MarshalIndent(workouts, "", "    ")
+
+		for _, workout := range workouts {
+			dto := convertWorkout(workout)
+			workoutDtos = append(workoutDtos, dto)
+		}
+
+		jsonData, err3 := json.MarshalIndent(workoutDtos, "", "    ")
 		if err3 != nil {
 			panic(err)
 		}
@@ -144,7 +157,13 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		if err2 != nil {
 			log.Panicln(err2)
 		}
-		jsonData, err3 := json.MarshalIndent(workouts, "", "    ")
+
+		for _, workout := range workouts {
+			dto := convertWorkout(workout)
+			workoutDtos = append(workoutDtos, dto)
+		}
+
+		jsonData, err3 := json.MarshalIndent(workoutDtos, "", "    ")
 		if err3 != nil {
 			panic(err)
 		}
@@ -158,4 +177,22 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 			log.Fatalln(err5)
 		}
 	}
+}
+
+func convertWorkout(workout Workout) WorkoutDto {
+
+	dto := WorkoutDto{
+		Id:           workout.Id,
+		Record:       workout.Record,
+		Sets:         workout.Sets,
+		Comments:     workout.Comments,
+		CreationDate: workout.CreationDate.String(),
+		WorkoutDate:  workout.WorkoutDate,
+		Day:          workout.Day,
+		Week:         workout.Week,
+		WorkoutType:  workout.WorkoutType,
+		Month:        workout.Month,
+		Year:         workout.Year,
+	}
+	return dto
 }
