@@ -38,14 +38,20 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		paramName = "workout_date"
 		param = wDate
 	} else if len(month) > 0 && len(year) > 0 {
-		paramName, paramName2 = "month", "year"
-		param, param2 = month, year
+
+		// todo: debug
+		log.Println(">>>>>> len(month) > 0 && len(year) > 0 ")
+
+		paramName = "month"
+		paramName2 = "year"
+		param = month
+		param2 = year
 	} else if len(comments) > 0 {
 		paramName = "comments"
 		param = comments
 	}
-	log.Printf(">>>>> param is %s: %s ", paramName, param)
-	log.Printf(">>>>> param is %s: %s ", paramName2, param2)
+	log.Printf(">>>>> param is { %s: %s }", paramName, param)
+	log.Printf(">>>>> param2 is { %s: %s } ", paramName2, param2)
 
 	uri := os.Getenv("DB_URL")
 	client, err := mongo.Connect(context.TODO(), options.Client().ApplyURI(uri))
@@ -63,16 +69,19 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 	var workouts []Workout
 	workoutDtos := make([]WorkoutDto, 0)
 
+	// by month and year
 	if paramName == "month" && paramName2 == "year" {
-		//filter := bson.D{{paramName, param}, }
-
 		//filter := bson.D{{paramName, param}, bson.M{"createdAt": bson.M{
 		//	"$gte": primitive.NewDateTimeFromTime(time.Now())
 		//}}}
 
 		//"01 Oct 22 15:04 MST"
-		workDate, err := time.Parse(time.RFC822, fmt.Sprintf("01 %s %s 00:00 MST", month[0:3], year[2:4]))
-		log.Printf(">>> parsed date is : %s", fmt.Sprintf("01 %s %s 00:00 MST", month[0:3], year[2:4]))
+		//workDate, err := time.Parse(time.RFC822, fmt.Sprintf("01 %s %s 00:00 MST", month[0:3], year[2:4]))
+
+		workDate, err := time.Parse(time.RFC3339Nano, fmt.Sprintf("%s-%s-01T00:00:00.000+00:00", param2, GetMonthNumByName(param)))
+
+		// debug
+		log.Printf(">>>>> parsed DATE from 'RFC3339Nano' is : %s", workDate)
 
 		// 2023-08-25T12:25:22.102+00:00
 
@@ -109,6 +118,8 @@ func GetWorkouts(writer http.ResponseWriter, req *http.Request) {
 		if err5 != nil {
 			log.Fatalln(err5)
 		}
+
+		// by 1 parameter
 	} else if len(paramName) > 0 {
 		// filter / query
 		filter := bson.D{{paramName, param}}
